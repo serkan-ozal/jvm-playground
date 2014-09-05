@@ -11,15 +11,22 @@
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-        <source.compiler.version>1.8</source.compiler.version>
-        <target.compiler.version>1.8</target.compiler.version>
+        <source.compiler.version>1.7</source.compiler.version>
+        <target.compiler.version>1.7</target.compiler.version>
         
         <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
         <maven.resources.plugin.version>2.4</maven.resources.plugin.version>
         <maven.surefire.plugin.version>2.9</maven.surefire.plugin.version>
         
-        <sa_jdi.version>1.8</sa_jdi.version> 
-        <tools.version>1.6.2</tools.version>
+        <jillegal.version>2.1-SNAPSHOT</jillegal.version>
+        <sa_jdi.version>1.7</sa_jdi.version> 
+        <tools.version>1.7</tools.version>
+        <guava.version>13.0</guava.version>
+        <commons.lang.version>2.6</commons.lang.version>
+        <javassist.version>3.17.1-GA</javassist.version>
+        <cglib.version>2.2</cglib.version>
+        <reflections.version>0.9.9-RC1</reflections.version>
+        <log4j.version>1.2.16</log4j.version>
 
     </properties>
   
@@ -34,7 +41,7 @@
                     <source>${source.compiler.version}</source>
                     <target>${target.compiler.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <executable>${env.JAVA8_HOME}/bin/javac</executable>
+                    <executable>${env.JAVA7_HOME}/bin/javac</executable>
 					<fork>true</fork>
                 </configuration>
             </plugin>
@@ -61,6 +68,11 @@
     </build>
     
    	<dependencies>
+   		<dependency>
+            <groupId>tr.com.serkanozal</groupId>
+            <artifactId>jillegal</artifactId>
+            <version>${jillegal.version}</version>
+        </dependency>
 		<dependency>
             <groupId>com.sun.tools</groupId>
             <artifactId>sa_jdi</artifactId>
@@ -70,6 +82,31 @@
             <groupId>com.sun</groupId>
             <artifactId>tools</artifactId>
             <version>${tools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>${cglib.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>${javassist.version}</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.reflections</groupId>
+    		<artifactId>reflections</artifactId>
+    		<version>${reflections.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
 	</dependencies>
     
