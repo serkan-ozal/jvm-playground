@@ -375,7 +375,7 @@ public class CompressedOops {
 
     // ////////////////////////////////////////////////////////////////////////////
 
-    private static HotspotJvmClassAddressFinder createClassAddressFinder() {
+    public static HotspotJvmClassAddressFinder createClassAddressFinder() {
         if (JvmUtil.isJava_6()) {
             if (JvmUtil.getAddressSize() == JvmUtil.ADDRESSING_4_BYTE) {
                 return new Java6On32BitHotspotJvmClassAddressFinder();
@@ -421,7 +421,7 @@ public class CompressedOops {
         }
     }
 
-    private static interface HotspotJvmClassAddressFinder {
+    public static interface HotspotJvmClassAddressFinder {
 
         long CLASS_DEFINITION_POINTER_OFFSET_IN_CLASS_INSTANCE_32_BIT_FOR_JAVA_6 = 8L;
         long CLASS_DEFINITION_POINTER_OFFSET_IN_CLASS_INSTANCE_64_BIT_WITH_COMPRESSED_REF_FOR_JAVA_6 = 12L;
