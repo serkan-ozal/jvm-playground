@@ -11,16 +11,16 @@
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-        <source.compiler.version>1.7</source.compiler.version>
-        <target.compiler.version>1.7</target.compiler.version>
+        <source.compiler.version>1.8</source.compiler.version>
+        <target.compiler.version>1.8</target.compiler.version>
         
         <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
         <maven.resources.plugin.version>2.4</maven.resources.plugin.version>
         <maven.surefire.plugin.version>2.9</maven.surefire.plugin.version>
         
         <jillegal.version>2.1-SNAPSHOT</jillegal.version>
-        <sa_jdi.version>1.7</sa_jdi.version> 
-        <tools.version>1.7</tools.version>
+        <sa_jdi.version>1.8</sa_jdi.version> 
+        <tools.version>1.8</tools.version>
         <guava.version>13.0</guava.version>
         <commons.lang.version>2.6</commons.lang.version>
         <javassist.version>3.17.1-GA</javassist.version>
@@ -41,7 +41,7 @@
                     <source>${source.compiler.version}</source>
                     <target>${target.compiler.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <executable>${env.JAVA7_HOME}/bin/javac</executable>
+                    <executable>${env.JAVA8_HOME}/bin/javac</executable>
 					<fork>true</fork>
                 </configuration>
             </plugin>

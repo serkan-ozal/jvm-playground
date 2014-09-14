@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import sun.jvm.hotspot.HotSpotAgent;
@@ -99,6 +100,9 @@ public class HotspotJvmInfoUtil {
 	}
 	
 	private static HotspotJvmInfo findJvmInfo(int processId) {
+	    if (StringUtils.isNotEmpty(System.getProperty("disableHotspotSA"))) {
+	        return null;
+	    }
 		if (processId == 0) {
 			return null;
 		}
