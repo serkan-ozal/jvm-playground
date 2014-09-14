@@ -51,6 +51,8 @@ public class UnsafeCopyMemory {
        
         ////////////////////////////////////////////////////////////////////////
         
+        // Serialize objects
+        
         long copyOffset = BYTE_ARRAY_INDEX_OFFSET;
         for (int i = 0; i < OBJ_COUNT; i++) {
             Foo foo = createRandomFoo();
@@ -59,6 +61,8 @@ public class UnsafeCopyMemory {
         }
         
         ////////////////////////////////////////////////////////////////////////
+        
+        // Deserialize objects
         
         copyOffset = BYTE_ARRAY_INDEX_OFFSET;
         for (int i = 0; i < OBJ_COUNT; i++) {
