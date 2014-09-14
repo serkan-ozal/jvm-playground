@@ -33,38 +33,35 @@ public class UnsafeClassCast {
     private static final String FOO_CLASS_NAME = "tr.com.serkanozal.jvm.playground.UnsafeClassCast$Foo";
     private static final Method HAS_STATIC_INITIALIZER_METHOD;
     private static final Map<Class<?>, Long> UID_MAP = new ConcurrentHashMap<Class<?>, Long>();
-    
+
     static {
         try {
-            HAS_STATIC_INITIALIZER_METHOD = 
-                    ObjectStreamClass.class.getDeclaredMethod(
-                            "hasStaticInitializer", 
-                            Class.class);
+            HAS_STATIC_INITIALIZER_METHOD = ObjectStreamClass.class
+                    .getDeclaredMethod("hasStaticInitializer", Class.class);
             HAS_STATIC_INITIALIZER_METHOD.setAccessible(true);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             throw new IllegalStateException(t);
         }
     }
-    
+
     public static void main(String[] args) throws Exception {
-        FooClassLoader cl = new FooClassLoader(ClasspathUtil.getClasspathUrls().toArray(new URL[0]));
+        FooClassLoader cl = new FooClassLoader(ClasspathUtil.getClasspathUrls()
+                .toArray(new URL[0]));
         Foo foo = null;
-        
-        try {    
+
+        try {
             try {
-                foo = (Foo)cl.loadClass(FOO_CLASS_NAME).newInstance();
-            } 
-            catch (ClassCastException e) {
+                foo = (Foo) cl.loadClass(FOO_CLASS_NAME).newInstance();
+            } catch (ClassCastException e) {
                 e.printStackTrace();
             }
-            
-            foo = unsafeCast(cl.loadClass(FOO_CLASS_NAME).newInstance(), Foo.class);
-            
+
+            foo = unsafeCast(cl.loadClass(FOO_CLASS_NAME).newInstance(),
+                    Foo.class);
+
             System.out.println(foo);
-        } 
-        finally {
+        } finally {
             cl.close();
         }
     }
@@ -76,59 +73,60 @@ public class UnsafeClassCast {
         }
         // If classes have same name
         if (obj.getClass().getName().equals(clazz.getName())) {
-            // Find serial version uid, which represents signature of class, of class of object
+            // Find serial version uid, which represents signature of class, of
+            // class of object
             Long uid1 = UID_MAP.get(obj.getClass());
             if (uid1 == null) {
                 uid1 = generateSerialVersionUID(obj.getClass());
                 UID_MAP.put(obj.getClass(), uid1);
             }
-            
-            // Find serial version uid, which represents signature of class, of target class to cast
+
+            // Find serial version uid, which represents signature of class, of
+            // target class to cast
             Long uid2 = UID_MAP.get(clazz);
             if (uid2 == null) {
                 uid2 = generateSerialVersionUID(clazz);
                 UID_MAP.put(clazz, uid2);
             }
-            
-            // If their serial version uids are different, this means that they have different signatures
+
+            // If their serial version uids are different, this means that they
+            // have different signatures
             // and so they cannot be same and cannot be cast to eachother
             if (uid1 != uid2) {
-                new ClassCastException(
-                        obj.getClass().getName() + " cannot be cast to " + clazz.getName() + 
-                        " since they have different signature !");
+                new ClassCastException(obj.getClass().getName()
+                        + " cannot be cast to " + clazz.getName()
+                        + " since they have different signature !");
             }
-            
+
             // Update class definition pointer of object to target class
             switch (JvmUtil.getAddressSize()) {
-                case JvmUtil.ADDRESSING_4_BYTE:
-                    JvmUtil.getUnsafe().
-                        putInt( obj, 
-                                JvmUtil.getClassDefPointerOffsetInObject(), 
-                                (int) JvmUtil.toJvmAddress(JvmUtil.addressOfClass(clazz)));
-                    break;
-                case JvmUtil.ADDRESSING_8_BYTE:
-                    JvmUtil.getUnsafe().
-                        putLong( obj, 
-                                JvmUtil.getClassDefPointerOffsetInObject(), 
-                                JvmUtil.toJvmAddress(JvmUtil.addressOfClass(clazz)));
-                    break;
-                default:
-                    throw new IllegalStateException("Unsupported address size: " + JvmUtil.getAddressSize() + " !");
+            case JvmUtil.ADDRESSING_4_BYTE:
+                JvmUtil.getUnsafe().putInt(
+                        obj,
+                        JvmUtil.getClassDefPointerOffsetInObject(),
+                        (int) JvmUtil.toJvmAddress(JvmUtil
+                                .addressOfClass(clazz)));
+                break;
+            case JvmUtil.ADDRESSING_8_BYTE:
+                JvmUtil.getUnsafe().putLong(obj,
+                        JvmUtil.getClassDefPointerOffsetInObject(),
+                        JvmUtil.toJvmAddress(JvmUtil.addressOfClass(clazz)));
+                break;
+            default:
+                throw new IllegalStateException("Unsupported address size: "
+                        + JvmUtil.getAddressSize() + " !");
             }
             return (T) obj;
-        }
-        else {
+        } else {
             if (clazz.isAssignableFrom(obj.getClass())) {
                 return (T) obj;
-            }
-            else {
-                throw 
-                    new ClassCastException(
-                            obj.getClass().getName() + " cannot be cast to " + clazz.getName() + " !");
+            } else {
+                throw new ClassCastException(obj.getClass().getName()
+                        + " cannot be cast to " + clazz.getName() + " !");
             }
         }
     }
-    
+
     @SuppressWarnings("rawtypes")
     private static long generateSerialVersionUID(Class<?> cl) {
         try {
@@ -137,9 +135,8 @@ public class UnsafeClassCast {
 
             dout.writeUTF(cl.getName());
 
-            int classMods = cl.getModifiers() &
-                (Modifier.PUBLIC | Modifier.FINAL |
-                 Modifier.INTERFACE | Modifier.ABSTRACT);
+            int classMods = cl.getModifiers()
+                    & (Modifier.PUBLIC | Modifier.FINAL | Modifier.INTERFACE | Modifier.ABSTRACT);
 
             /*
              * compensate for javac bug in which ABSTRACT bit was set for an
@@ -147,9 +144,8 @@ public class UnsafeClassCast {
              */
             Method[] methods = cl.getDeclaredMethods();
             if ((classMods & Modifier.INTERFACE) != 0) {
-                classMods = (methods.length > 0) ?
-                    (classMods | Modifier.ABSTRACT) :
-                    (classMods & ~Modifier.ABSTRACT);
+                classMods = (methods.length > 0) ? (classMods | Modifier.ABSTRACT)
+                        : (classMods & ~Modifier.ABSTRACT);
             }
             dout.writeInt(classMods);
 
@@ -182,12 +178,12 @@ public class UnsafeClassCast {
             });
             for (int i = 0; i < fieldSigs.length; i++) {
                 MemberSignature sig = fieldSigs[i];
-                int mods = sig.member.getModifiers() &
-                    (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED |
-                     Modifier.STATIC | Modifier.FINAL | Modifier.VOLATILE |
-                     Modifier.TRANSIENT);
-                if (((mods & Modifier.PRIVATE) == 0) ||
-                    ((mods & (Modifier.STATIC | Modifier.TRANSIENT)) == 0)) {
+                int mods = sig.member.getModifiers()
+                        & (Modifier.PUBLIC | Modifier.PRIVATE
+                                | Modifier.PROTECTED | Modifier.STATIC
+                                | Modifier.FINAL | Modifier.VOLATILE | Modifier.TRANSIENT);
+                if (((mods & Modifier.PRIVATE) == 0)
+                        || ((mods & (Modifier.STATIC | Modifier.TRANSIENT)) == 0)) {
                     dout.writeUTF(sig.name);
                     dout.writeInt(mods);
                     dout.writeUTF(sig.signature);
@@ -212,11 +208,11 @@ public class UnsafeClassCast {
             });
             for (int i = 0; i < consSigs.length; i++) {
                 MemberSignature sig = consSigs[i];
-                int mods = sig.member.getModifiers() &
-                    (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED |
-                     Modifier.STATIC | Modifier.FINAL |
-                     Modifier.SYNCHRONIZED | Modifier.NATIVE |
-                     Modifier.ABSTRACT | Modifier.STRICT);
+                int mods = sig.member.getModifiers()
+                        & (Modifier.PUBLIC | Modifier.PRIVATE
+                                | Modifier.PROTECTED | Modifier.STATIC
+                                | Modifier.FINAL | Modifier.SYNCHRONIZED
+                                | Modifier.NATIVE | Modifier.ABSTRACT | Modifier.STRICT);
                 if ((mods & Modifier.PRIVATE) == 0) {
                     dout.writeUTF("<init>");
                     dout.writeInt(mods);
@@ -239,11 +235,11 @@ public class UnsafeClassCast {
             });
             for (int i = 0; i < methSigs.length; i++) {
                 MemberSignature sig = methSigs[i];
-                int mods = sig.member.getModifiers() &
-                    (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED |
-                     Modifier.STATIC | Modifier.FINAL |
-                     Modifier.SYNCHRONIZED | Modifier.NATIVE |
-                     Modifier.ABSTRACT | Modifier.STRICT);
+                int mods = sig.member.getModifiers()
+                        & (Modifier.PUBLIC | Modifier.PRIVATE
+                                | Modifier.PROTECTED | Modifier.STATIC
+                                | Modifier.FINAL | Modifier.SYNCHRONIZED
+                                | Modifier.NATIVE | Modifier.ABSTRACT | Modifier.STRICT);
                 if ((mods & Modifier.PRIVATE) == 0) {
                     dout.writeUTF(sig.name);
                     dout.writeInt(mods);
@@ -260,15 +256,13 @@ public class UnsafeClassCast {
                 hash = (hash << 8) | (hashBytes[i] & 0xFF);
             }
             return hash;
-        } 
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new InternalError();
-        } 
-        catch (NoSuchAlgorithmException ex) {
+        } catch (NoSuchAlgorithmException ex) {
             throw new SecurityException(ex.getMessage());
         }
     }
-    
+
     /**
      * Returns true if the given class defines a static initializer method,
      * false otherwise.
@@ -276,13 +270,12 @@ public class UnsafeClassCast {
     private static boolean hasStaticInitializer(Class<?> cl) {
         try {
             return (Boolean) HAS_STATIC_INITIALIZER_METHOD.invoke(null, cl);
-        } 
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             throw new IllegalStateException(t);
-        } 
+        }
     }
-    
+
     /**
      * Returns JVM type signature for given class.
      */
@@ -295,46 +288,36 @@ public class UnsafeClassCast {
         if (cl.isPrimitive()) {
             if (cl == Integer.TYPE) {
                 sbuf.append('I');
-            } 
-            else if (cl == Byte.TYPE) {
+            } else if (cl == Byte.TYPE) {
                 sbuf.append('B');
-            } 
-            else if (cl == Long.TYPE) {
+            } else if (cl == Long.TYPE) {
                 sbuf.append('J');
-            } 
-            else if (cl == Float.TYPE) {
+            } else if (cl == Float.TYPE) {
                 sbuf.append('F');
-            } 
-            else if (cl == Double.TYPE) {
+            } else if (cl == Double.TYPE) {
                 sbuf.append('D');
-            } 
-            else if (cl == Short.TYPE) {
+            } else if (cl == Short.TYPE) {
                 sbuf.append('S');
-            } 
-            else if (cl == Character.TYPE) {
+            } else if (cl == Character.TYPE) {
                 sbuf.append('C');
-            } 
-            else if (cl == Boolean.TYPE) {
+            } else if (cl == Boolean.TYPE) {
                 sbuf.append('Z');
-            } 
-            else if (cl == Void.TYPE) {
+            } else if (cl == Void.TYPE) {
                 sbuf.append('V');
-            } 
-            else {
+            } else {
                 throw new InternalError();
             }
-        } 
-        else {
+        } else {
             sbuf.append('L' + cl.getName().replace('.', '/') + ';');
         }
         return sbuf.toString();
     }
-    
+
     /**
      * Returns JVM type signature for given list of parameters and return type.
      */
     private static String getMethodSignature(Class<?>[] paramTypes,
-                                             Class<?> retType) {
+            Class<?> retType) {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append('(');
         for (int i = 0; i < paramTypes.length; i++) {
@@ -344,7 +327,7 @@ public class UnsafeClassCast {
         sbuf.append(getClassSignature(retType));
         return sbuf.toString();
     }
-    
+
     /**
      * Class for computing and caching field/constructor/method signatures
      * during serialVersionUID calculation.
@@ -364,27 +347,26 @@ public class UnsafeClassCast {
         public MemberSignature(Constructor<?> cons) {
             member = cons;
             name = cons.getName();
-            signature = getMethodSignature(
-                cons.getParameterTypes(), Void.TYPE);
+            signature = getMethodSignature(cons.getParameterTypes(), Void.TYPE);
         }
 
         public MemberSignature(Method meth) {
             member = meth;
             name = meth.getName();
-            signature = getMethodSignature(
-                meth.getParameterTypes(), meth.getReturnType());
+            signature = getMethodSignature(meth.getParameterTypes(),
+                    meth.getReturnType());
         }
-        
+
     }
-    
+
     private static class FooClassLoader extends URLClassLoader {
 
         private static Class<?> FOO_CLASS = null;
-        
+
         public FooClassLoader(URL[] urls) {
             super(urls);
         }
-        
+
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             if (name.equals(FOO_CLASS_NAME)) {
@@ -392,21 +374,20 @@ public class UnsafeClassCast {
                     FOO_CLASS = findClass(name);
                 }
                 return FOO_CLASS;
-            } 
-            else {
+            } else {
                 return super.loadClass(name);
             }
         }
-        
+
     }
-    
+
     public static class Foo {
-        
+
         @Override
         public String toString() {
             return "Hello, I am Foo !!!";
         }
-        
+
     }
- 
+
 }
