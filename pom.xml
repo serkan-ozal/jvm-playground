@@ -108,6 +108,11 @@
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun.hotspot</groupId>
+            <artifactId>whitebox</artifactId>
+            <version>1.8</version>
+        </dependency>
 	</dependencies>
     
     <repositories>
