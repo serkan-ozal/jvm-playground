@@ -23,7 +23,7 @@ public class ChangeImmutableVmFlagDemo {
                         "com.sun.management:type=HotSpotDiagnostic", 
                         HotSpotDiagnosticMXBean.class);
         
-        System.out.println("UnlockDiagnosticVMOptions: " + mxbean.getVMOption("UnlockDiagnosticVMOptions"));
+        System.out.println("[BEFORE] UnlockDiagnosticVMOptions: " + mxbean.getVMOption("UnlockDiagnosticVMOptions"));
         
         JVM jvm = new JVM();
 
@@ -61,14 +61,14 @@ public class ChangeImmutableVmFlagDemo {
             if ("UnlockDiagnosticVMOptions".equals(flagName)) {
                 if (jvm.getByte(flagAddrAddress) == 0) {
                     jvm.putByte(flagAddrAddress, (byte) 0x01);
-                    System.out.println(flagName + " has been enabled!");
+                    System.out.println(flagName + " has been enabled");
                 } else {
                     System.out.println(flagName + " is already enabled");
                 }
             }
         }
         
-        System.out.println("UnlockDiagnosticVMOptions: " + mxbean.getVMOption("UnlockDiagnosticVMOptions"));
+        System.out.println("[AFTER] UnlockDiagnosticVMOptions: " + mxbean.getVMOption("UnlockDiagnosticVMOptions"));
     }
 
 }
