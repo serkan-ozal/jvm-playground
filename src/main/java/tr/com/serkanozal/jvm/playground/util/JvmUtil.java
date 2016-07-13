@@ -172,15 +172,7 @@ public class JvmUtil {
             throw new AssertionError("JVM is not supported: " + JVM_NAME);
         }
 
-        try {
-            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafeField.setAccessible(true);
-            unsafe = (Unsafe) unsafeField.get(null);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Unable to get unsafe", e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Unable to get unsafe", e);
-        }
+        unsafe = UnsafeUtil.UNSAFE;
 
         try {
             findProcessId();
@@ -1741,17 +1733,21 @@ public class JvmUtil {
             return null;
         }
         try {
-            // TODO IBM is not supported right now
-            return null;
-            /*
-             * if (oopSize == unsafe.addressSize()) { return new
-             * VMOptions("IBM"); }
-             * 
-             * if (NR_BITS == BITS_64) { if (isIBMCompressedRefs()) { return new
-             * VMOptions("IBM", DEFAULT_COMPRESSED_REF_SHIFT_SIZE); } else {
-             * return new VMOptions("IBM"); } } else { return new
-             * VMOptions("IBM"); }
-             */
+            if (oopSize == unsafe.addressSize()) { 
+                return new VMOptions("IBM"); 
+            }
+        
+            if (NR_BITS == BITS_64) { 
+                if (isIBMCompressedRefs()) { 
+                     return new VMOptions("IBM", DEFAULT_COMPRESSED_REF_SHIFT_SIZE); 
+                } 
+                else {
+                     return new VMOptions("IBM"); 
+                } 
+            } 
+            else { 
+                return new VMOptions("IBM"); 
+            }
         } catch (Exception e) {
             logger.error("Failed to read IBM-specific configuration properly",
                     e);
